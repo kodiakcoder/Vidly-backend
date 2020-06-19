@@ -73,4 +73,4 @@ const validateGenre = (genre) => {
   return Joi.validate(genre, schema);
 };
 
-module.export = router;
+module.exports = router;
