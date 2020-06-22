@@ -40,7 +40,7 @@ router.post("/", async (req, res) => {
 });
 
 //Route to update a movie document
-router.put("/", async (req, res) => {
+router.put("/:id", async (req, res) => {
   const validate = validateMovie(req.params.body);
   if (validate.error) return res.status(400).send(validate.error.message);
   const movie = req.params.body;
