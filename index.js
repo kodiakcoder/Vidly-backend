@@ -7,14 +7,10 @@ const app = express();
 
 //console.log(config.get("mongoURL"));
 const dbURL = config.get("mongoURL");
-mongoose.connect(
-  dbURL,
-  { useUnifiedTopology: true, useNewUrlParser: true },
-  () => {
-    console.log("Connected to mongodb");
-  },
-  (err) => console.log("DB Error: ", err)
-);
+mongoose
+  .connect(dbURL, { useUnifiedTopology: true, useNewUrlParser: true })
+  .then(() => console.log("Connected to mongodb"))
+  .catch((errr) => console.log("Error: ", err));
 
 app.use(express.json());
 app.use(morgan("tiny"));
