@@ -4,10 +4,10 @@ const { Genre, validateGenre } = require("../models/genre.model");
 
 //Get All Genres
 router.get("/", async (req, res) => {
-  console.log("Getting Genres");
+  //console.log("Getting Genres");
 
   const result = await Genre.find();
-  console.log("Genres found returning them");
+  //console.log("Genres found returning them");
   res.send(result);
 });
 
@@ -34,15 +34,19 @@ router.post("/", async (req, res) => {
 
 //Update a genre
 router.put("/:id", async (req, res) => {
-  const genre = Genre.find({ _id: req.params.id });
-  if (!genre) return res.status(404).send("Genre Not Found");
-
   const result = validateGenre(req.body);
   if (result.error) return res.status(400).send(result.error.message);
+  //console.log(genre);
+  const genre = await Genre.findOneAndUpdate(
+    req.params.id,
+    {
+      name: req.body.name,
+    },
+    { new: true }
+  );
+  if (!genre) return res.status(404).send("Genre Not Found");
 
-  genre.name = req.body.name;
-  const savedResult = await genre.save();
-  res.send(savedResult);
+  res.send(genre);
 });
 
 //Delete a genre

@@ -1,7 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const config = require("config");
-const genreRoutes = require("./routes/genre.routes");
+const genreRouter = require("./routes/genre.routes");
+const movieRouter = require("./routes/movie.routes");
+const customerRouter = require("./routes/customer.routes");
 const morgan = require("morgan");
 const app = express();
 
@@ -10,11 +12,17 @@ const dbURL = config.get("mongoURL");
 mongoose
   .connect(dbURL, { useUnifiedTopology: true, useNewUrlParser: true })
   .then(() => console.log("Connected to mongodb"))
-  .catch((errr) => console.log("Error: ", err));
+  .catch((err) => console.log("Error: ", err));
 
 app.use(express.json());
+
+//Adding Middleware
 app.use(morgan("tiny"));
-app.use("/api/genres", genreRoutes);
+
+//Setting API Routes to be used
+app.use("/api/genres", genreRouter);
+app.use("/api/movies", movieRouter);
+app.use("/api/customers", customerRouter);
 
 app.listen(3000, () => {
   console.log("Listing on Port 3000");

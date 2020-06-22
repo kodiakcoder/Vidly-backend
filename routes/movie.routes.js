@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { Movie, validateMovie } = require("../models/movie.model");
-const Genre = require("../models/genre.model");
+const { Genre } = require("../models/genre.model");
 
 //Route to get all movie documents
 router.get("/", async (req, res) => {
@@ -18,18 +18,21 @@ router.get("/:id", async (req, res) => {
 
 //Route to Add a movie document
 router.post("/", async (req, res) => {
-  //TODO:Perform validation on movie object
-  const validate = validateMovie(req.params.body);
+  console.log("Adding movie");
+  console.log("Movie object: ", req.body);
+  const validate = validateMovie(req.body);
   if (validate.error) return res.status(400).send(validate.error.message);
-  const movie = req.params.body;
-  const genre = await Genre.findById({ _id: movie.genreID });
+  console.log("validated movie");
+  const movie = req.body;
+  console.log("Movie object: ", movie);
+  const genre = await Genre.findById(movie.genreId);
   if (!genre) return res.status(404).send("Genre by that id Not Found");
-
+  console.log("Genre found is: ", genre);
   const newMovie = new Movie({
     title: movie.title,
     genre: {
       _id: genre._id,
-      genre: genre.genre,
+      name: genre.name,
     },
     numberInStock: movie.numberInStock,
     dailyRentalRate: movie.dailyRentalRate,
@@ -41,26 +44,37 @@ router.post("/", async (req, res) => {
 
 //Route to update a movie document
 router.put("/:id", async (req, res) => {
-  const validate = validateMovie(req.params.body);
+  const validate = validateMovie(req.body);
   if (validate.error) return res.status(400).send(validate.error.message);
-  const movie = req.params.body;
-  const oldMovie = await Movie.findById({ _id: req.params.id });
-  if (!oldMovie) return res.status(404).send("Movie by that id doesnt exist");
-  const genre = await Genre.findById({ _id: movie.genreID });
-  if (!genre) return res.status(404).send("Genre by  that id doesnt exist");
+  const movie = req.body;
 
-  oldMovie.title = movie.title;
-  oldMovie.genre._id = genre._id;
-  oldMovie.genre.name = genre.name;
-  oldMovie.numberInStock = movie.numberInStock;
-  oldMovie.dailyRentalRate = movie.dailyRentalRate;
+  const genreResult = await Genre.findById({ _id: movie.genreId });
+  if (!genreResult)
+    return res.status(404).send("Genre by  that id doesnt exist");
 
-  const result = await oldMovie.save();
+  const result = await Movie.findOneAndUpdate(
+    req.params.id,
+    {
+      title: movie.title,
+      genre: {
+        _id: genreResult._id,
+        name: genreResult.name,
+      },
+      numberInStock: movie.numberInStock,
+      dailyRentalRate: movie.dailyRentalRate,
+    },
+    { new: true }
+  );
+
+  if (!result) return res.status(404).send("Couldnt update movie");
+
   res.send(result);
 });
 
 //Route to delete a movie docuent
-router.delete("/", async (req, res) => {
-  const result = Movie.findByIdAndDelete({ _id: req.params.id });
+router.delete("/:id", async (req, res) => {
+  const result = await Movie.findByIdAndDelete({ _id: req.params.id });
   res.send(result);
 });
+
+module.exports = router;

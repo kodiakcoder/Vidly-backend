@@ -18,9 +18,9 @@ router.get("/:id", async (req, res) => {
 
 //Add a new customer
 router.post("/", async (req, res) => {
-  const validate = validateCustomer(req.params.body);
+  const validate = validateCustomer(req.body);
   if (validate.error) return res.status(400).send(validate.error.message);
-  const customerData = req.params.body;
+  const customerData = req.body;
   const newCustomer = new Customer({
     name: customerData.name,
     phone: customerData.phone,
@@ -32,22 +32,29 @@ router.post("/", async (req, res) => {
 
 //Update a customer
 router.put("/:id", async (req, res) => {
-  const validate = validateCustomer(req.params.body);
+  const validate = validateCustomer(req.body);
   if (validate.error) return res.status(400).send(validate.error.message);
-  const customer = await Customer.findById(req.param.id);
+  const customerData = req.body;
+  const customer = await Customer.findOneAndUpdate(
+    req.param.id,
+    {
+      name: customerData.name,
+      phone: customerData.phone,
+      isGold: customerData.isGold,
+    },
+    { new: true }
+  );
   if (!customer)
     return res.status(404).send("Customer by that id is not found");
-  const customerData = req.params.body;
-  customer.name = customerData.name;
-  customer.phone = customerData.phone;
-  customer.isGold = customerData.isGold;
-  const result = await customer.save();
-  res.send(result);
+
+  res.send(customer);
 });
 
 //Delete A Customer
 
 router.delete("/:id", async (req, res) => {
-  const result = Customer.findByIdAndDelete(req.params.id);
+  const result = await Customer.findByIdAndDelete({ _id: req.params.id });
   res.send(result);
 });
+
+module.exports = router;
