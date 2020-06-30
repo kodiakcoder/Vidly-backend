@@ -5,6 +5,8 @@ const genreRouter = require("./routes/genre.routes");
 const movieRouter = require("./routes/movie.routes");
 const customerRouter = require("./routes/customer.routes");
 const rentalRouter = require("./routes/rental.routes");
+const userRouter = require("./routes/user.routes");
+const authRouter = require("./routes/auth.routes");
 const morgan = require("morgan");
 const app = express();
 
@@ -21,6 +23,8 @@ app.use(express.json());
 app.use(morgan("tiny"));
 
 //Setting API Routes to be used
+app.use("/api/auth", authRouter);
+app.use("/api/users", userRouter);
 app.use("/api/genres", genreRouter);
 app.use("/api/movies", movieRouter);
 app.use("/api/customers", customerRouter);
